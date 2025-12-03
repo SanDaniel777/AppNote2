@@ -3,9 +3,7 @@ package com.example.appnote2
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.material3.MaterialTheme
 import com.example.appnote2.ui.navigation.AppNavigation
 
 class MainActivity : ComponentActivity() {
@@ -14,8 +12,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme {
-                val navController = rememberNavController()
-                AppNavigation(navController)
+                AppNavigation()
             }
         }
     }
