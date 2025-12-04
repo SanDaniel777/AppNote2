@@ -3,65 +3,48 @@ package com.example.appnote2.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appnote2.data.model.Note
+import com.example.appnote2.ui.viewmodel.NoteViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     onCreateNote: () -> Unit,
-    onNoteClick: (String) -> Unit
+    onNoteClick: (Int) -> Unit,
+    noteViewModel: NoteViewModel = viewModel()
 ) {
+
+    val notes by noteViewModel.notes.collectAsState()
+
+    // ✅ Cargar notas al entrar a la pantalla
+    LaunchedEffect(Unit) {
+        noteViewModel.loadNotes()
+    }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateNote) {
-                Icon(Icons.Default.Add, contentDescription = "Add Note")
+                Text("+")
             }
         }
     ) { padding ->
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .padding(16.dp)
         ) {
-
-            Text(
-                text = "Mis Notas",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(16.dp)
-            )
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(10) { index ->
-                    NoteItem(
-                        title = "Nota $index",
-                        description = "Descripción de ejemplo $index",
-                        onClick = { onNoteClick(index.toString()) }
-                    )
+            items(notes) { note ->
+                NoteItem(note = note) {
+                    onNoteClick(note.id)
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun NoteItem(title: String, description: String, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { onClick() }
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = title, style = MaterialTheme.typography.titleMedium)
-            Text(text = description, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

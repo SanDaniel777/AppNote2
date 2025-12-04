@@ -1,16 +1,29 @@
 package com.example.appnote2.data.repository
 
-import com.example.appnote2.data.dao.NoteDao
-import com.example.appnote2.data.model.Note
-import kotlinx.coroutines.flow.Flow
+import com.example.appnote2.data.remote.RetrofitInstance
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
-class NoteRepository(private val noteDao: NoteDao) {
+class NoteRepository {
 
-    fun getNotes(): Flow<List<Note>> = noteDao.getAllNotes()
+    suspend fun getNotes() =
+        RetrofitInstance.api.getNotes()
 
-    fun getNoteById(id: Int): Flow<Note> = noteDao.getNoteById(id)
+    suspend fun createNote(
+        title: RequestBody,
+        description: RequestBody,
+        image: MultipartBody.Part?,
+        audio: MultipartBody.Part?
+    ) = RetrofitInstance.api.createNote(title, description, image, audio)
 
-    suspend fun insert(note: Note) = noteDao.insertNote(note)
+    suspend fun updateNote(
+        id: Int,
+        title: RequestBody,
+        description: RequestBody,
+        image: MultipartBody.Part?,
+        audio: MultipartBody.Part?
+    ) = RetrofitInstance.api.updateNote(id, title, description, image, audio)
 
-    suspend fun delete(note: Note) = noteDao.deleteNote(note)
+    suspend fun deleteNote(id: Int) =
+        RetrofitInstance.api.deleteNote(id)
 }
