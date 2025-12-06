@@ -8,11 +8,11 @@ import retrofit2.http.*
 
 interface ApiService {
 
-    // ✅ GET → obtener todas las notas
+    // GET: obtener todas las notas
     @GET("notes")
     suspend fun getNotes(): Response<List<Note>>
 
-    // ✅ POST → crear nota (multipart)
+    // POST: crear nota (multipart)
     @Multipart
     @POST("notes")
     suspend fun createNote(
@@ -22,7 +22,7 @@ interface ApiService {
         @Part audio: MultipartBody.Part?
     ): Response<Note>
 
-    // ✅ PUT → actualizar nota
+    //PUT → actualizar nota
     @Multipart
     @PUT("notes/{id}")
     suspend fun updateNote(
