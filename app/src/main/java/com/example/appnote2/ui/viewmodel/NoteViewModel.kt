@@ -1,15 +1,20 @@
 package com.example.appnote2.ui.viewmodel
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appnote2.data.model.Note
 import com.example.appnote2.data.repository.NoteRepository
+import com.example.appnote2.ui.utils.uriToFile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class NoteViewModel : ViewModel() {
 
@@ -75,9 +80,38 @@ class NoteViewModel : ViewModel() {
             }
         }
     }
-    fun createNote(title: String, description: String, imageUri: Uri?) {
+
+    fun createNote(title: String, description: String, imageUri: Uri?, context: Context) {
         viewModelScope.launch {
-            // Aquí luego conectamos con Retrofit
+            try {
+                val titleBody = title.toRequestBody("text/plain".toMediaType())
+                val descriptionBody = description.toRequestBody("text/plain".toMediaType())
+
+                val imagePart: MultipartBody.Part? = imageUri?.let { uri ->
+                    val file = uriToFile(uri, context)
+
+                    val requestFile =
+                        file.asRequestBody("image/*".toMediaType())
+
+                    MultipartBody.Part.createFormData(
+                        "image",
+                        file.name,
+                        requestFile
+                    )
+                }
+
+                repository.createNote(
+                    titleBody,
+                    descriptionBody,
+                    imagePart,
+                    null
+                )
+
+                loadNotes()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

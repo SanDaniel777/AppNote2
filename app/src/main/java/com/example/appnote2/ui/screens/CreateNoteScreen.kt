@@ -2,6 +2,8 @@ package com.example.appnote2.ui.screens
 
 import android.content.Context
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -10,11 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.appnote2.ui.utils.createImageFile
 import com.example.appnote2.ui.viewmodel.NoteViewModel
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,7 +87,7 @@ fun CreateNoteScreen(
 
             Button(
                 onClick = {
-                    viewModel.createNote(title, description, imageUri)
+                    viewModel.createNote(title, description, imageUri, context)
                     onBack()
                 },
                 modifier = Modifier.fillMaxWidth()
