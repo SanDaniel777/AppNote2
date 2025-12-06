@@ -1,11 +1,13 @@
 package com.example.appnote2.ui.screens
 
-import androidx.compose.foundation.Image
+import android.media.MediaPlayer
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -13,24 +15,33 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.appnote2.ui.viewmodel.NoteViewModel
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteDetailScreen(
-    noteId: String,
+    noteId: Int,
     viewModel: NoteViewModel,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val notes by viewModel.notes.collectAsState()
+    val note = notes.find { it.id == noteId }
 
-    val note = notes.find { it.id.toString() == noteId }
+    // MediaPlayer
+    var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
+    var isPlaying by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Detalle de Nota") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        mediaPlayer?.release()
+                        mediaPlayer = null
+                        onBack()
+                    }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = null)
                     }
                 }
@@ -57,7 +68,7 @@ fun NoteDetailScreen(
                 .verticalScroll(rememberScrollState())
         ) {
 
-            // ✅ TÍTULO
+            // Título
             Text(
                 text = note.title,
                 style = MaterialTheme.typography.headlineMedium
@@ -65,7 +76,7 @@ fun NoteDetailScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ✅ DESCRIPCIÓN
+            // Descripción
             Text(
                 text = note.description,
                 style = MaterialTheme.typography.bodyLarge
@@ -73,7 +84,7 @@ fun NoteDetailScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ✅ IMAGEN (solo si existe)
+            // Imagen
             if (!note.imagePath.isNullOrEmpty()) {
                 AsyncImage(
                     model = note.imagePath,
@@ -82,6 +93,37 @@ fun NoteDetailScreen(
                         .fillMaxWidth()
                         .height(250.dp)
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Audio
+            if (!note.audioPath.isNullOrEmpty()) {
+                Button(onClick = {
+                    if (mediaPlayer == null) {
+                        mediaPlayer = MediaPlayer().apply {
+                            setDataSource(note.audioPath)
+                            prepare()
+                            start()
+                        }
+                        isPlaying = true
+                    } else {
+                        if (isPlaying) {
+                            mediaPlayer?.pause()
+                            isPlaying = false
+                        } else {
+                            mediaPlayer?.start()
+                            isPlaying = true
+                        }
+                    }
+                }) {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(if (isPlaying) "Pausar Audio" else "Reproducir Audio")
+                }
             }
         }
     }

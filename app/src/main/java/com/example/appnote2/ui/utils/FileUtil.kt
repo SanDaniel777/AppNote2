@@ -25,15 +25,3 @@ fun uriToFile(uri: Uri, context: Context): File {
 
     return file
 }
-
-fun uriToMultipart(uri: Uri, fieldName: String): MultipartBody.Part {
-    val file = uriToFile(uri)
-    val requestFile =
-        file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-
-    return MultipartBody.Part.createFormData(
-        fieldName,
-        file.name,
-        requestFile
-    )
-}

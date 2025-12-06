@@ -47,11 +47,11 @@ fun AppNavigation() {
         composable(
             route = "noteDetail/{noteId}",
             arguments = listOf(
-                navArgument("noteId") { type = NavType.StringType }
+                navArgument("noteId") { type = NavType.IntType } // Cambiado a IntType
             )
         ) { backStackEntry ->
 
-            val noteId = backStackEntry.arguments?.getString("noteId") ?: ""
+            val noteId = backStackEntry.arguments?.getInt("noteId") ?: 0 // Obtenemos Int directamente
             val viewModel: NoteViewModel = viewModel()
 
             NoteDetailScreen(
@@ -60,5 +60,6 @@ fun AppNavigation() {
                 onBack = { navController.popBackStack() }
             )
         }
+
     }
 }
