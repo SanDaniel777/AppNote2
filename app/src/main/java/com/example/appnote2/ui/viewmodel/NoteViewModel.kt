@@ -1,5 +1,6 @@
 package com.example.appnote2.ui.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appnote2.data.model.Note
@@ -72,6 +73,11 @@ class NoteViewModel : ViewModel() {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+    fun createNote(title: String, description: String, imageUri: Uri?) {
+        viewModelScope.launch {
+            // Aquí luego conectamos con Retrofit
         }
     }
 }

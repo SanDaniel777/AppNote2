@@ -1,6 +1,7 @@
 package com.example.appnote2.ui.screens
 
 import android.content.Context
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -22,13 +23,17 @@ fun CreateNoteScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
 
-
-    var imagePart by remember { mutableStateOf<MultipartBody.Part?>(null) }
-    var audioPart by remember { mutableStateOf<MultipartBody.Part?>(null) }
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (!success) {
+            imageUri = null
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -36,7 +41,7 @@ fun CreateNoteScreen(
                 title = { Text("Nueva Nota") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Default.ArrowBack, contentDescription = null)
                     }
                 }
             )
@@ -65,47 +70,24 @@ fun CreateNoteScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-
-            Button(
-                onClick = {
-                    // Próximo paso: Cámara
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Agregar Foto")
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
-                    // Próximo paso: Micrófono
+                    val uri = createImageFile(context)
+                    imageUri = uri
+                    launcher.launch(uri)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Grabar Audio")
+                Text("Tomar Foto")
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
-
-                    val titleBody: RequestBody =
-                        title.toRequestBody("text/plain".toMediaTypeOrNull())
-
-                    val descriptionBody: RequestBody =
-                        description.toRequestBody("text/plain".toMediaTypeOrNull())
-
-                    viewModel.createNote(
-                        title = titleBody,
-                        description = descriptionBody,
-                        image = imagePart,
-                        audio = audioPart
-                    )
-
+                    viewModel.createNote(title, description, imageUri)
                     onBack()
                 },
                 modifier = Modifier.fillMaxWidth()
