@@ -44,7 +44,6 @@ fun AppNavigation() {
             )
         }
 
-        // Detalle de nota (con argumento)
         composable(
             route = "noteDetail/{noteId}",
             arguments = listOf(
@@ -53,9 +52,11 @@ fun AppNavigation() {
         ) { backStackEntry ->
 
             val noteId = backStackEntry.arguments?.getString("noteId") ?: ""
+            val viewModel: NoteViewModel = viewModel()
 
             NoteDetailScreen(
                 noteId = noteId,
+                viewModel = viewModel,
                 onBack = { navController.popBackStack() }
             )
         }
