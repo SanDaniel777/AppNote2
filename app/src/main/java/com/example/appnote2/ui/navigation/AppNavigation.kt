@@ -21,9 +21,11 @@ fun AppNavigation() {
         startDestination = "main"
     ) {
 
-        // Pantalla principal
         composable("main") {
+            val viewModel: NoteViewModel = viewModel()
+
             MainScreen(
+                viewModel = viewModel,
                 onCreateNote = {
                     navController.navigate("createNote")
                 },

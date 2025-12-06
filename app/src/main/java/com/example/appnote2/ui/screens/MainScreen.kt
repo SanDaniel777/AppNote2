@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -12,24 +14,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appnote2.data.model.Note
 import com.example.appnote2.ui.viewmodel.NoteViewModel
 
+
 @Composable
 fun MainScreen(
+    viewModel: NoteViewModel,
     onCreateNote: () -> Unit,
-    onNoteClick: (Int) -> Unit,
-    noteViewModel: NoteViewModel = viewModel()
+    onNoteClick: (Int) -> Unit
 ) {
+    val notes by viewModel.notes.collectAsState()
 
-    val notes by noteViewModel.notes.collectAsState()
-
-    // ✅ Cargar notas al entrar a la pantalla
     LaunchedEffect(Unit) {
-        noteViewModel.loadNotes()
+        viewModel.loadNotes()
     }
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateNote) {
-                Text("+")
+                Icon(Icons.Default.Add, contentDescription = "Crear Nota")
             }
         }
     ) { padding ->
@@ -38,12 +39,13 @@ fun MainScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
         ) {
+
             items(notes) { note ->
-                NoteItem(note = note) {
-                    onNoteClick(note.id)
-                }
+                NoteItem(
+                    note = note,
+                    onClick = { onNoteClick(note.id) }
+                )
             }
         }
     }
