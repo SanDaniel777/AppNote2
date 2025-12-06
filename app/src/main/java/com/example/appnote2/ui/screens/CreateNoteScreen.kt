@@ -23,15 +23,24 @@ fun CreateNoteScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
 
-    val launcher = rememberLauncherForActivityResult(
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var audioUri by remember { mutableStateOf<Uri?>(null) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
-        if (!success) {
-            imageUri = null
+        if (!success) imageUri = null
+    }
+
+    val audioLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            audioUri = result.data?.data
         }
     }
 
@@ -61,7 +70,7 @@ fun CreateNoteScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
                 value = description,
@@ -72,22 +81,36 @@ fun CreateNoteScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = {
-                    val uri = createImageFile(context)
-                    imageUri = uri
-                    launcher.launch(uri)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            // 📸 BOTÓN CÁMARA
+            Button(onClick = {
+                val uri = createImageFile(context)
+                imageUri = uri
+                cameraLauncher.launch(uri)
+            }) {
                 Text("Tomar Foto")
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // 🎤 BOTÓN AUDIO
+            Button(onClick = {
+                val intent = Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
+                audioLauncher.launch(intent)
+            }) {
+                Text("Grabar Audio")
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // ✅ GUARDAR NOTA
             Button(
                 onClick = {
-                    viewModel.createNote(title, description, imageUri, context)
+                    viewModel.createNote(
+                        title,
+                        description,
+                        imageUri,
+                        audioUri
+                    )
                     onBack()
                 },
                 modifier = Modifier.fillMaxWidth()
