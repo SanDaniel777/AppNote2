@@ -183,54 +183,38 @@ class NoteViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val titleBody = title.toRequestBody("text/plain".toMediaType())
-                val descriptionBody = description.toRequestBody("text/plain".toMediaType())
+                val descBody = description.toRequestBody("text/plain".toMediaType())
 
                 // Imagen
                 val imagePart: MultipartBody.Part? = imageUri?.let { uri ->
                     val file = uriToFile(uri, context)
                     val requestFile = file.asRequestBody("image/*".toMediaType())
-
-                    MultipartBody.Part.createFormData(
-                        "image",
-                        file.name,
-                        requestFile
-                    )
+                    MultipartBody.Part.createFormData("image", file.name, requestFile)
                 }
 
                 // Audio
                 val audioPart: MultipartBody.Part? = audioUri?.let { uri ->
                     val file = uriToFile(uri, context)
                     val requestFile = file.asRequestBody("audio/*".toMediaType())
-
-                    MultipartBody.Part.createFormData(
-                        "audio",
-                        file.name,
-                        requestFile
-                    )
+                    MultipartBody.Part.createFormData("audio", file.name, requestFile)
                 }
 
-                val response = repository.updateNote(
-                    id,
-                    titleBody,
-                    descriptionBody,
-                    imagePart,
-                    audioPart
-                )
+                val response = repository.updateNote(id, titleBody, descBody, imagePart, audioPart)
 
                 if (response.isSuccessful) {
-                    println("✅ NOTA ACTUALIZADA CORRECTAMENTE")
+                    println("✅ Nota actualizada en el servidor")
                     loadNotes()
                 } else {
-                    println("❌ ERROR AL ACTUALIZAR = ${response.code()}")
-                    println("❌ BODY: ${response.errorBody()?.string()}")
+                    println("❌ Error update ${response.code()}")
+                    println("❌ Server: ${response.errorBody()?.string()}")
                 }
 
             } catch (e: Exception) {
-                println("🔥 ERROR UPDATE: ${e.message}")
                 e.printStackTrace()
             }
         }
     }
+
 
 
     fun getNoteById(id: Int): Note? {

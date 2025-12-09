@@ -7,6 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -25,7 +26,8 @@ fun NoteDetailScreen(
     noteId: Int,
     viewModel: NoteViewModel,
     onBack: () -> Unit,
-    onEdit: (Int) -> Unit
+    onEdit: (Int) -> Unit,
+    onDelete: (Int) -> Unit
 ) {
     val context = LocalContext.current
     val notes by viewModel.notes.collectAsState()
@@ -54,6 +56,30 @@ fun NoteDetailScreen(
     var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
     var isPlaying by remember { mutableStateOf(false) }
 
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDelete(noteId)
+                    showDeleteDialog = false
+                }) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancelar")
+                }
+            },
+            title = { Text("¿Eliminar nota?") },
+            text = { Text("Esta acción no se puede deshacer.") }
+        )
+    }
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -73,6 +99,9 @@ fun NoteDetailScreen(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Editar Nota"
                         )
+                    }
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Eliminar")
                     }
                 }
             )

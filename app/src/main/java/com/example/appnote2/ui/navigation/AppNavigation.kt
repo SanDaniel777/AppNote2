@@ -59,7 +59,12 @@ fun AppNavigation() {
                 noteId = noteId,
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
-                onEdit = { id -> navController.navigate("editNote/$id") }
+                onEdit = { id -> navController.navigate("editNote/$id") },
+                onDelete = { id ->
+                    viewModel.deleteNote(id)
+                    navController.popBackStack() // regresar al Main
+                }
+
             )
 
         }

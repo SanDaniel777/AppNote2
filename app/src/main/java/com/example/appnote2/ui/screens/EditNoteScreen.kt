@@ -1,5 +1,8 @@
 package com.example.appnote2.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
@@ -14,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,50 +27,44 @@ fun EditNoteScreen(
     viewModel: NoteViewModel,
     onBack: () -> Unit
 ) {
-    val notes by viewModel.notes.collectAsState()
     val context = LocalContext.current
+    val notes by viewModel.notes.collectAsState()
 
-
-    // 🔥 Debug para confirmar ID
+    // Cargar notas si están vacías
     LaunchedEffect(Unit) {
-        println("🔥 EDITING NOTE ID = $noteId")
+        if (notes.isEmpty()) viewModel.loadNotes()
     }
 
-    // 🔥 Si no hay notas, cargarlas
-    LaunchedEffect(Unit) {
-        if (notes.isEmpty()) {
-            println("⚠️ Notas vacías, cargando desde servidor...")
-            viewModel.loadNotes()
-        }
-    }
-
-    // 🔄 Mostrar cargando mientras llegan
+    // Mostrar cargando
     if (notes.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
         return
     }
 
-    // 🔍 Buscar la nota una vez que ya cargaron
     val note = notes.find { it.id == noteId }
 
     if (note == null) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Nota no encontrada")
-        }
+        Text("Nota no encontrada")
         return
     }
 
-    // ----- CAMPOS EDITABLES -----
     var title by remember { mutableStateOf(note.title) }
     var description by remember { mutableStateOf(note.description) }
+
+    // NUEVO: estados para editar imagen/audio
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var audioUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Pickers
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> imageUri = uri }
+
+    val audioPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> audioUri = uri }
 
     Scaffold(
         topBar = {
@@ -85,6 +83,8 @@ fun EditNoteScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
             TextField(
@@ -94,18 +94,47 @@ fun EditNoteScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(Modifier.height(10.dp))
-
             TextField(
                 value = description,
                 onValueChange = { description = it },
                 label = { Text("Descripción") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
+                modifier = Modifier.fillMaxWidth().height(180.dp)
             )
 
-            Spacer(Modifier.height(20.dp))
+            // PREVIEW DE LA IMAGEN ACTUAL
+            if (!note.imagePath.isNullOrEmpty() && imageUri == null) {
+                Text("Imagen actual:")
+                AsyncImage(
+                    model = note.imagePath,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth().height(200.dp)
+                )
+            }
+
+            // PREVIEW DE LA NUEVA IMAGEN
+            if (imageUri != null) {
+                Text("Nueva imagen seleccionada:")
+                AsyncImage(
+                    model = imageUri,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth().height(200.dp)
+                )
+            }
+
+            Button(
+                onClick = { imagePicker.launch("image/*") },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Cambiar imagen")
+            }
+
+            // BOTÓN AUDIO
+            Button(
+                onClick = { audioPicker.launch("audio/*") },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Cambiar audio")
+            }
 
             Button(
                 onClick = {
@@ -113,12 +142,13 @@ fun EditNoteScreen(
                         id = noteId,
                         title = title,
                         description = description,
-                        imageUri = null, // luego agregamos edición de imagen si quieres
-                        audioUri = null, // igual para audio
+                        imageUri = imageUri,  // NUEVO
+                        audioUri = audioUri,  // NUEVO
                         context = context
                     )
                     onBack()
-                }
+                },
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Guardar cambios")
             }
