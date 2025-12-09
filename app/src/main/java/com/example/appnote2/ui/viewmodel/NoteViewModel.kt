@@ -172,4 +172,69 @@ class NoteViewModel : ViewModel() {
         }
     }
 
+    fun updateNote(
+        id: Int,
+        title: String,
+        description: String,
+        imageUri: Uri?,
+        audioUri: Uri?,
+        context: Context
+    ) {
+        viewModelScope.launch {
+            try {
+                val titleBody = title.toRequestBody("text/plain".toMediaType())
+                val descriptionBody = description.toRequestBody("text/plain".toMediaType())
+
+                // Imagen
+                val imagePart: MultipartBody.Part? = imageUri?.let { uri ->
+                    val file = uriToFile(uri, context)
+                    val requestFile = file.asRequestBody("image/*".toMediaType())
+
+                    MultipartBody.Part.createFormData(
+                        "image",
+                        file.name,
+                        requestFile
+                    )
+                }
+
+                // Audio
+                val audioPart: MultipartBody.Part? = audioUri?.let { uri ->
+                    val file = uriToFile(uri, context)
+                    val requestFile = file.asRequestBody("audio/*".toMediaType())
+
+                    MultipartBody.Part.createFormData(
+                        "audio",
+                        file.name,
+                        requestFile
+                    )
+                }
+
+                val response = repository.updateNote(
+                    id,
+                    titleBody,
+                    descriptionBody,
+                    imagePart,
+                    audioPart
+                )
+
+                if (response.isSuccessful) {
+                    println("✅ NOTA ACTUALIZADA CORRECTAMENTE")
+                    loadNotes()
+                } else {
+                    println("❌ ERROR AL ACTUALIZAR = ${response.code()}")
+                    println("❌ BODY: ${response.errorBody()?.string()}")
+                }
+
+            } catch (e: Exception) {
+                println("🔥 ERROR UPDATE: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    }
+
+
+    fun getNoteById(id: Int): Note? {
+        return _notes.value.find { it.id == id }
+    }
+
 }

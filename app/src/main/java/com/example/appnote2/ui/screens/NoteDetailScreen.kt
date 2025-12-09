@@ -1,11 +1,13 @@
 package com.example.appnote2.ui.screens
 
+import android.R.attr.padding
 import android.media.MediaPlayer
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -22,13 +24,33 @@ import androidx.compose.ui.platform.LocalContext
 fun NoteDetailScreen(
     noteId: Int,
     viewModel: NoteViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onEdit: (Int) -> Unit
 ) {
     val context = LocalContext.current
     val notes by viewModel.notes.collectAsState()
+
+    // --- 🔥 CARGAR NOTAS SI AÚN NO EXISTEN ---
+    LaunchedEffect(Unit) {
+        if (notes.isEmpty()) {
+            viewModel.loadNotes()
+        }
+    }
+
+    // --- 🔥 MIENTRAS CARGAN ---
+    if (notes.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    // --- 🔥 BUSCAR LA NOTA ---
     val note = notes.find { it.id == noteId }
 
-    // MediaPlayer
     var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
     var isPlaying by remember { mutableStateOf(false) }
 
@@ -42,7 +64,15 @@ fun NoteDetailScreen(
                         mediaPlayer = null
                         onBack()
                     }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Regresar")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { onEdit(noteId) }) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar Nota"
+                        )
                     }
                 }
             )
@@ -68,7 +98,7 @@ fun NoteDetailScreen(
                 .verticalScroll(rememberScrollState())
         ) {
 
-            // Título
+            // TÍTULO
             Text(
                 text = note.title,
                 style = MaterialTheme.typography.headlineMedium
@@ -76,7 +106,7 @@ fun NoteDetailScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Descripción
+            // DESCRIPCIÓN
             Text(
                 text = note.description,
                 style = MaterialTheme.typography.bodyLarge
@@ -84,7 +114,7 @@ fun NoteDetailScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Imagen
+            // IMAGEN
             if (!note.imagePath.isNullOrEmpty()) {
                 AsyncImage(
                     model = note.imagePath,
@@ -93,11 +123,10 @@ fun NoteDetailScreen(
                         .fillMaxWidth()
                         .height(250.dp)
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Audio
+            // AUDIO
             if (!note.audioPath.isNullOrEmpty()) {
                 Button(onClick = {
                     if (mediaPlayer == null) {

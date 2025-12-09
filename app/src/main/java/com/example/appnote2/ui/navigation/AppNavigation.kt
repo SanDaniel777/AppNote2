@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.appnote2.ui.screens.CreateNoteScreen
+import com.example.appnote2.ui.screens.EditNoteScreen
 import com.example.appnote2.ui.screens.MainScreen
 import com.example.appnote2.ui.screens.NoteDetailScreen
 import com.example.appnote2.ui.viewmodel.NoteViewModel
@@ -57,9 +58,29 @@ fun AppNavigation() {
             NoteDetailScreen(
                 noteId = noteId,
                 viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onEdit = { id -> navController.navigate("editNote/$id") }
+            )
+
+        }
+
+        // Editar Nota
+        composable(
+            route = "editNote/{noteId}",
+            arguments = listOf(
+                navArgument("noteId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val noteId = backStackEntry.arguments?.getInt("noteId") ?: 0
+            val viewModel: NoteViewModel = viewModel()
+
+            EditNoteScreen(
+                noteId = noteId,
+                viewModel = viewModel,
                 onBack = { navController.popBackStack() }
             )
         }
+
 
     }
 }
