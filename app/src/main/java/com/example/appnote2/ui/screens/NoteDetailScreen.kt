@@ -19,6 +19,7 @@ import coil.compose.AsyncImage
 import com.example.appnote2.ui.viewmodel.NoteViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import com.example.appnote2.sensors.GyroscopeManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,10 +28,13 @@ fun NoteDetailScreen(
     viewModel: NoteViewModel,
     onBack: () -> Unit,
     onEdit: (Int) -> Unit,
-    onDelete: (Int) -> Unit
+    onDelete: (Int) -> Unit,
+    onNavigateToNote: (Int) -> Unit
+
 ) {
     val context = LocalContext.current
     val notes by viewModel.notes.collectAsState()
+    val currentIndex = notes.indexOfFirst { it.id == noteId }
 
     // --- 🔥 CARGAR NOTAS SI AÚN NO EXISTEN ---
     LaunchedEffect(Unit) {
@@ -55,6 +59,22 @@ fun NoteDetailScreen(
 
     var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
     var isPlaying by remember { mutableStateOf(false) }
+
+    val gyro = remember {
+        GyroscopeManager(
+            context = context,
+            onRotateLeft = {
+                if (currentIndex > 0) {
+                    onNavigateToNote(notes[currentIndex - 1].id)
+                }
+            },
+            onRotateRight = {
+                if (currentIndex < notes.lastIndex) {
+                    onNavigateToNote(notes[currentIndex + 1].id)
+                }
+            }
+        )
+    }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 

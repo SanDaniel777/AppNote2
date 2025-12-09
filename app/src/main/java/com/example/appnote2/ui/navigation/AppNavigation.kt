@@ -63,11 +63,18 @@ fun AppNavigation() {
                 onDelete = { id ->
                     viewModel.deleteNote(id)
                     navController.popBackStack() // regresar al Main
+                },
+                onNavigateToNote = { newId ->
+                    navController.navigate("noteDetail/$newId") {
+                        launchSingleTop = true
+                        popUpTo("noteDetail/$noteId") { inclusive = true }
+                    }
                 }
 
             )
 
         }
+
 
         // Editar Nota
         composable(
