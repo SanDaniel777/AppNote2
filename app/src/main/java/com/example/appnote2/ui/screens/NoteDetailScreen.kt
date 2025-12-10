@@ -41,7 +41,7 @@ fun NoteDetailScreen(
     val notes by viewModel.notes.collectAsState()
     val currentIndex = notes.indexOfFirst { it.id == noteId }
 
-    // Cargar notas si no están listas
+
     LaunchedEffect(Unit) {
         if (notes.isEmpty()) {
             viewModel.loadNotes()
@@ -63,9 +63,7 @@ fun NoteDetailScreen(
     var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
     var isPlaying by remember { mutableStateOf(false) }
 
-    // -----------------------------
-    // 🔥 GIROSCOPO REAL
-    // -----------------------------
+
     val gyro = remember {
         GyroscopeManager(
             context = context,
@@ -168,7 +166,7 @@ fun NoteDetailScreen(
                 .verticalScroll(rememberScrollState())
         ) {
 
-            // TÍTULO
+
             Text(
                 text = note.title,
                 style = MaterialTheme.typography.headlineMedium
@@ -176,7 +174,7 @@ fun NoteDetailScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // DESCRIPCIÓN
+
             Text(
                 text = note.description,
                 style = MaterialTheme.typography.bodyLarge
@@ -184,7 +182,7 @@ fun NoteDetailScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // IMAGEN
+
             if (!note.imagePath.isNullOrEmpty()) {
                 AsyncImage(
                     model = note.imagePath,
@@ -196,7 +194,7 @@ fun NoteDetailScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // AUDIO
+
             if (!note.audioPath.isNullOrEmpty()) {
                 Button(onClick = {
                     if (mediaPlayer == null) {

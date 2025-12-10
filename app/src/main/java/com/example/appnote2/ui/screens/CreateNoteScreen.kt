@@ -31,14 +31,14 @@ fun CreateNoteScreen(
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var audioUri by remember { mutableStateOf<Uri?>(null) }
 
-    // 📸 CÁMARA
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (!success) imageUri = null
     }
 
-// 👉 PERMISO
+
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -49,7 +49,7 @@ fun CreateNoteScreen(
         }
     }
 
-    // 🎤 AUDIO
+
     val audioLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -95,7 +95,7 @@ fun CreateNoteScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 📸 BOTÓN CÁMARA
+
             Button(
                 onClick = {
                     permissionLauncher.launch(android.Manifest.permission.CAMERA)
@@ -108,7 +108,7 @@ fun CreateNoteScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // 🎤 BOTÓN AUDIO
+
             Button(
                 onClick = {
                     val intent = Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
@@ -121,10 +121,10 @@ fun CreateNoteScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ✅ GUARDAR NOTA (CORRECTO)
+
             Button(
                 onClick = {
-                    println("CLICK EN GUARDAR") // 👈 ESTO
+                    println("CLICK EN GUARDAR")
                     viewModel.createNote(
                         title = title,
                         description = description,

@@ -105,17 +105,16 @@ class NoteViewModel : ViewModel() {
                     null
                 )
 
-                // ✅ AQUÍ ESTÁ LA CLAVE
                 if (response.isSuccessful) {
-                    println("✅ NOTA GUARDADA CORRECTAMENTE")
+                    println(" NOTA GUARDADA CORRECTAMENTE")
                     loadNotes()
                 } else {
-                    println("❌ ERROR AL GUARDAR: ${response.code()}")
-                    println("❌ ERROR BODY: ${response.errorBody()?.string()}")
+                    println(" ERROR AL GUARDAR: ${response.code()}")
+                    println(" ERROR BODY: ${response.errorBody()?.string()}")
                 }
 
             } catch (e: Exception) {
-                println("🔥 EXCEPCIÓN: ${e.message}")
+                println(" EXCEPCIÓN: ${e.message}")
                 e.printStackTrace()
             }
         }
@@ -133,13 +132,11 @@ class NoteViewModel : ViewModel() {
                 val titleBody = title.toRequestBody("text/plain".toMediaType())
                 val descriptionBody = description.toRequestBody("text/plain".toMediaType())
 
-                // ----------------------------
-                //  IMAGEN
-                // ----------------------------
+
                 val imagePart: MultipartBody.Part? = imageUri?.let { uri ->
                     val file = uriToFile(uri, context)
 
-                    // OBTENER MIME real
+
                     val mime = context.contentResolver.getType(uri) ?: "image/*"
 
                     val requestFile = file.asRequestBody(mime.toMediaType())
@@ -150,13 +147,11 @@ class NoteViewModel : ViewModel() {
                     )
                 }
 
-                // ----------------------------
-                //  AUDIO (CORRECCIÓN IMPORTANTE)
-                // ----------------------------
+
                 val audioPart: MultipartBody.Part? = audioUri?.let { uri ->
                     val file = uriToFile(uri, context)
 
-                    // MIME real (ANTES siempre mandabas "audio/*")
+
                     val mime = context.contentResolver.getType(uri) ?: "audio/*"
 
                     val requestFile = file.asRequestBody(mime.toMediaType())
@@ -167,9 +162,7 @@ class NoteViewModel : ViewModel() {
                     )
                 }
 
-                // ----------------------------
-                //  LLAMADA AL SERVIDOR
-                // ----------------------------
+
                 val response = repository.createNote(
                     titleBody,
                     descriptionBody,
@@ -178,11 +171,11 @@ class NoteViewModel : ViewModel() {
                 )
 
                 if (response.isSuccessful) {
-                    println("✅ Nota creada correctamente con imagen/audio")
-                    loadNotes() // recargar notas actualizadas
+                    println(" Nota creada correctamente con imagen/audio")
+                    loadNotes()
                 } else {
-                    println("❌ Error al crear nota: ${response.code()}")
-                    println("❌ ${response.errorBody()?.string()}")
+                    println(" Error al crear nota: ${response.code()}")
+                    println(" ${response.errorBody()?.string()}")
                 }
 
             } catch (e: Exception) {
@@ -205,14 +198,14 @@ class NoteViewModel : ViewModel() {
                 val titleBody = title.toRequestBody("text/plain".toMediaType())
                 val descBody = description.toRequestBody("text/plain".toMediaType())
 
-                // Imagen
+
                 val imagePart: MultipartBody.Part? = imageUri?.let { uri ->
                     val file = uriToFile(uri, context)
                     val requestFile = file.asRequestBody("image/*".toMediaType())
                     MultipartBody.Part.createFormData("image", file.name, requestFile)
                 }
 
-                // Audio
+
                 val audioPart: MultipartBody.Part? = audioUri?.let { uri ->
                     val file = uriToFile(uri, context)
                     val requestFile = file.asRequestBody("audio/*".toMediaType())
@@ -222,11 +215,11 @@ class NoteViewModel : ViewModel() {
                 val response = repository.updateNote(id, titleBody, descBody, imagePart, audioPart)
 
                 if (response.isSuccessful) {
-                    println("✅ Nota actualizada en el servidor")
+                    println(" Nota actualizada en el servidor")
                     loadNotes()
                 } else {
-                    println("❌ Error update ${response.code()}")
-                    println("❌ Server: ${response.errorBody()?.string()}")
+                    println(" Error update ${response.code()}")
+                    println(" Server: ${response.errorBody()?.string()}")
                 }
 
             } catch (e: Exception) {

@@ -30,12 +30,12 @@ fun EditNoteScreen(
     val context = LocalContext.current
     val notes by viewModel.notes.collectAsState()
 
-    // Cargar notas si están vacías
+
     LaunchedEffect(Unit) {
         if (notes.isEmpty()) viewModel.loadNotes()
     }
 
-    // Mostrar cargando
+
     if (notes.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -53,11 +53,11 @@ fun EditNoteScreen(
     var title by remember { mutableStateOf(note.title) }
     var description by remember { mutableStateOf(note.description) }
 
-    // NUEVO: estados para editar imagen/audio
+
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var audioUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Pickers
+
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> imageUri = uri }
@@ -101,7 +101,7 @@ fun EditNoteScreen(
                 modifier = Modifier.fillMaxWidth().height(180.dp)
             )
 
-            // PREVIEW DE LA IMAGEN ACTUAL
+
             if (!note.imagePath.isNullOrEmpty() && imageUri == null) {
                 Text("Imagen actual:")
                 AsyncImage(
@@ -111,7 +111,7 @@ fun EditNoteScreen(
                 )
             }
 
-            // PREVIEW DE LA NUEVA IMAGEN
+
             if (imageUri != null) {
                 Text("Nueva imagen seleccionada:")
                 AsyncImage(
@@ -128,7 +128,7 @@ fun EditNoteScreen(
                 Text("Cambiar imagen")
             }
 
-            // BOTÓN AUDIO
+
             Button(
                 onClick = { audioPicker.launch("audio/*") },
                 modifier = Modifier.fillMaxWidth()
@@ -142,8 +142,8 @@ fun EditNoteScreen(
                         id = noteId,
                         title = title,
                         description = description,
-                        imageUri = imageUri,  // NUEVO
-                        audioUri = audioUri,  // NUEVO
+                        imageUri = imageUri,
+                        audioUri = audioUri,
                         context = context
                     )
                     onBack()

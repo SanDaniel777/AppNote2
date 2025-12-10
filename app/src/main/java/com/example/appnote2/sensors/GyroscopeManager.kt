@@ -17,7 +17,7 @@ class GyroscopeManager(
     private val gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
 
     private var lastTriggerTime = 0L
-    private val cooldown = 500 // ms para evitar multi detección
+    private val cooldown = 500
 
     fun start() {
         sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_GAME)
@@ -32,15 +32,15 @@ class GyroscopeManager(
     override fun onSensorChanged(event: SensorEvent?) {
         event ?: return
 
-        val zRotation = event.values[2] // giro izquierda/derecha
+        val zRotation = event.values[2]
 
         val now = System.currentTimeMillis()
         if (now - lastTriggerTime < cooldown) return
 
-        if (zRotation > 2.0f) {  // giró hacia la izquierda
+        if (zRotation > 2.0f) {
             lastTriggerTime = now
             onRotateLeft()
-        } else if (zRotation < -2.0f) { // giró hacia la derecha
+        } else if (zRotation < -2.0f) {
             lastTriggerTime = now
             onRotateRight()
         }

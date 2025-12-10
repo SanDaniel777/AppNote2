@@ -36,7 +36,7 @@ fun AppNavigation() {
             )
         }
 
-        // Crear Nota
+
         composable("createNote") {
             val viewModel: NoteViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
             CreateNoteScreen(
@@ -48,11 +48,11 @@ fun AppNavigation() {
         composable(
             route = "noteDetail/{noteId}",
             arguments = listOf(
-                navArgument("noteId") { type = NavType.IntType } // Cambiado a IntType
+                navArgument("noteId") { type = NavType.IntType }
             )
         ) { backStackEntry ->
 
-            val noteId = backStackEntry.arguments?.getInt("noteId") ?: 0 // Obtenemos Int directamente
+            val noteId = backStackEntry.arguments?.getInt("noteId") ?: 0
             val viewModel: NoteViewModel = viewModel()
 
             NoteDetailScreen(
@@ -62,7 +62,7 @@ fun AppNavigation() {
                 onEdit = { id -> navController.navigate("editNote/$id") },
                 onDelete = { id ->
                     viewModel.deleteNote(id)
-                    navController.popBackStack() // regresar al Main
+                    navController.popBackStack()
                 },
                 onNavigateToNote = { newId ->
                     navController.navigate("noteDetail/$newId") {
@@ -76,7 +76,7 @@ fun AppNavigation() {
         }
 
 
-        // Editar Nota
+
         composable(
             route = "editNote/{noteId}",
             arguments = listOf(

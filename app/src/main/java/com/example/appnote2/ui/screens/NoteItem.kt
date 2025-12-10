@@ -38,7 +38,7 @@ fun NoteItem(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            // ✅ MOSTRAR IMAGEN SI EXISTE
+
             if (!note.imagePath.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -52,7 +52,7 @@ fun NoteItem(
                 )
             }
 
-            // ✅ INDICADOR DE AUDIO
+
             if (!note.audioPath.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Icon(
