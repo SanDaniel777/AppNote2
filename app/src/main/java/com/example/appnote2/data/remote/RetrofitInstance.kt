@@ -6,9 +6,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
-    private const val BASE_URL = "http://10.0.2.2:5000/"
+    private const val BASE_URL = "http://192.168.0.55:5000/"
     // 👆 esta IP es para emulador Android
     //http://192.168.0.55:5000/
+    //10.0.2.2
 
     private val logger = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

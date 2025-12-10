@@ -5,6 +5,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import kotlin.math.abs
 
 class GyroscopeManager(
     context: Context,
@@ -12,39 +13,36 @@ class GyroscopeManager(
     private val onRotateRight: () -> Unit
 ) : SensorEventListener {
 
-    private val sensorManager =
-        context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-
-    private val gyroscope: Sensor? =
-        sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private val gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
 
     private var lastTriggerTime = 0L
-    private val cooldown = 700 // ms para evitar triggers múltiples
+    private val cooldown = 500 // ms para evitar multi detección
 
     fun start() {
-        gyroscope?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME)
-        }
+        sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_GAME)
     }
 
     fun stop() {
         sensorManager.unregisterListener(this)
     }
 
-    override fun onSensorChanged(event: SensorEvent) {
-        val yRotation = event.values[1] // rotación izquierda/derecha
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        event ?: return
+
+        val zRotation = event.values[2] // giro izquierda/derecha
 
         val now = System.currentTimeMillis()
         if (now - lastTriggerTime < cooldown) return
 
-        if (yRotation > 2.0f) {
+        if (zRotation > 2.0f) {  // giró hacia la izquierda
             lastTriggerTime = now
-            onRotateRight()    // → siguiente nota
-        } else if (yRotation < -2.0f) {
+            onRotateLeft()
+        } else if (zRotation < -2.0f) { // giró hacia la derecha
             lastTriggerTime = now
-            onRotateLeft()     // → nota anterior
+            onRotateRight()
         }
     }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }

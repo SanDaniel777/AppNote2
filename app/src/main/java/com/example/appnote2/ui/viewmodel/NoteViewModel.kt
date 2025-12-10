@@ -133,11 +133,16 @@ class NoteViewModel : ViewModel() {
                 val titleBody = title.toRequestBody("text/plain".toMediaType())
                 val descriptionBody = description.toRequestBody("text/plain".toMediaType())
 
-                // 📸 Imagen
+                // ----------------------------
+                //  IMAGEN
+                // ----------------------------
                 val imagePart: MultipartBody.Part? = imageUri?.let { uri ->
                     val file = uriToFile(uri, context)
-                    val requestFile = file.asRequestBody("image/*".toMediaType())
 
+                    // OBTENER MIME real
+                    val mime = context.contentResolver.getType(uri) ?: "image/*"
+
+                    val requestFile = file.asRequestBody(mime.toMediaType())
                     MultipartBody.Part.createFormData(
                         "image",
                         file.name,
@@ -145,11 +150,16 @@ class NoteViewModel : ViewModel() {
                     )
                 }
 
-                // 🎤 Audio
+                // ----------------------------
+                //  AUDIO (CORRECCIÓN IMPORTANTE)
+                // ----------------------------
                 val audioPart: MultipartBody.Part? = audioUri?.let { uri ->
                     val file = uriToFile(uri, context)
-                    val requestFile = file.asRequestBody("audio/*".toMediaType())
 
+                    // MIME real (ANTES siempre mandabas "audio/*")
+                    val mime = context.contentResolver.getType(uri) ?: "audio/*"
+
+                    val requestFile = file.asRequestBody(mime.toMediaType())
                     MultipartBody.Part.createFormData(
                         "audio",
                         file.name,
@@ -157,20 +167,30 @@ class NoteViewModel : ViewModel() {
                     )
                 }
 
-                repository.createNote(
+                // ----------------------------
+                //  LLAMADA AL SERVIDOR
+                // ----------------------------
+                val response = repository.createNote(
                     titleBody,
                     descriptionBody,
                     imagePart,
                     audioPart
                 )
 
-                loadNotes()
+                if (response.isSuccessful) {
+                    println("✅ Nota creada correctamente con imagen/audio")
+                    loadNotes() // recargar notas actualizadas
+                } else {
+                    println("❌ Error al crear nota: ${response.code()}")
+                    println("❌ ${response.errorBody()?.string()}")
+                }
 
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
+
 
     fun updateNote(
         id: Int,

@@ -38,6 +38,17 @@ fun CreateNoteScreen(
         if (!success) imageUri = null
     }
 
+// 👉 PERMISO
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val uri = createImageFile(context)
+            imageUri = uri
+            cameraLauncher.launch(uri)
+        }
+    }
+
     // 🎤 AUDIO
     val audioLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -87,14 +98,13 @@ fun CreateNoteScreen(
             // 📸 BOTÓN CÁMARA
             Button(
                 onClick = {
-                    val uri = createImageFile(context)
-                    imageUri = uri
-                    cameraLauncher.launch(uri)
+                    permissionLauncher.launch(android.Manifest.permission.CAMERA)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Tomar Foto")
             }
+
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -121,7 +131,9 @@ fun CreateNoteScreen(
                         imageUri = imageUri,
                         context = context
                     )
+
                     onBack()
+
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

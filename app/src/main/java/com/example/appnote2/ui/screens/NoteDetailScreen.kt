@@ -1,6 +1,5 @@
 package com.example.appnote2.ui.screens
 
-import android.R.attr.padding
 import android.media.MediaPlayer
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,7 +18,11 @@ import coil.compose.AsyncImage
 import com.example.appnote2.ui.viewmodel.NoteViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.example.appnote2.sensors.GyroscopeManager
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,20 +33,21 @@ fun NoteDetailScreen(
     onEdit: (Int) -> Unit,
     onDelete: (Int) -> Unit,
     onNavigateToNote: (Int) -> Unit
-
 ) {
+
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     val notes by viewModel.notes.collectAsState()
     val currentIndex = notes.indexOfFirst { it.id == noteId }
 
-    // --- 🔥 CARGAR NOTAS SI AÚN NO EXISTEN ---
+    // Cargar notas si no están listas
     LaunchedEffect(Unit) {
         if (notes.isEmpty()) {
             viewModel.loadNotes()
         }
     }
 
-    // --- 🔥 MIENTRAS CARGAN ---
     if (notes.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -54,12 +58,14 @@ fun NoteDetailScreen(
         return
     }
 
-    // --- 🔥 BUSCAR LA NOTA ---
     val note = notes.find { it.id == noteId }
 
     var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
     var isPlaying by remember { mutableStateOf(false) }
 
+    // -----------------------------
+    // 🔥 GIROSCOPO REAL
+    // -----------------------------
     val gyro = remember {
         GyroscopeManager(
             context = context,
@@ -75,6 +81,24 @@ fun NoteDetailScreen(
             }
         )
     }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> gyro.start()
+                Lifecycle.Event.ON_PAUSE -> gyro.stop()
+                else -> {}
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            gyro.stop()
+        }
+    }
+
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -115,10 +139,7 @@ fun NoteDetailScreen(
                 },
                 actions = {
                     IconButton(onClick = { onEdit(noteId) }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar Nota"
-                        )
+                        Icon(Icons.Default.Edit, contentDescription = "Editar Nota")
                     }
                     IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(Icons.Default.Delete, contentDescription = "Eliminar")

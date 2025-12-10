@@ -7,15 +7,20 @@ import java.io.FileOutputStream
 import java.io.InputStream
 
 fun uriToFile(uri: Uri, context: Context): File {
-    val inputStream: InputStream? =
-        context.contentResolver.openInputStream(uri)
+    val inputStream = context.contentResolver.openInputStream(uri)
+    val mimeType = context.contentResolver.getType(uri) ?: "application/octet-stream"
 
-    val file = File.createTempFile(
-        "upload_",
-        ".jpg",
-        context.cacheDir
-    )
+    val extension = when (mimeType) {
+        "audio/mpeg" -> ".mp3"
+        "audio/mp4" -> ".m4a"
+        "audio/3gpp" -> ".3gp"
+        "audio/wav" -> ".wav"
+        "image/jpeg" -> ".jpg"
+        "image/png" -> ".png"
+        else -> ".bin"
+    }
 
+    val file = File.createTempFile("upload_", extension, context.cacheDir)
     val outputStream = FileOutputStream(file)
 
     inputStream?.copyTo(outputStream)

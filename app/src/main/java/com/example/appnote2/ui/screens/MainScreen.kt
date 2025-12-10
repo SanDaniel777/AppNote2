@@ -23,7 +23,13 @@ fun MainScreen(
 ) {
     val notes by viewModel.notes.collectAsState()
 
+    // 🔥 Siempre recargar cuando MainScreen vuelve a ser visible
     LaunchedEffect(Unit) {
+        viewModel.loadNotes()
+    }
+
+    // 🔥 Si cambia la cantidad de notas, vuelve a recargar
+    LaunchedEffect(notes.size) {
         viewModel.loadNotes()
     }
 
@@ -40,7 +46,6 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-
             items(notes) { note ->
                 NoteItem(
                     note = note,
