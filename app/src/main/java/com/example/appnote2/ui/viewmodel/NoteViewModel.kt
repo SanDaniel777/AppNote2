@@ -37,39 +37,6 @@ class NoteViewModel : ViewModel() {
     }
 
 
-    fun createNote(
-        title: RequestBody,
-        description: RequestBody,
-        image: MultipartBody.Part?,
-        audio: MultipartBody.Part?
-    ) {
-        viewModelScope.launch {
-            try {
-                repository.createNote(title, description, image, audio)
-                loadNotes()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun updateNote(
-        id: Int,
-        title: RequestBody,
-        description: RequestBody,
-        image: MultipartBody.Part?,
-        audio: MultipartBody.Part?
-    ) {
-        viewModelScope.launch {
-            try {
-                repository.updateNote(id, title, description, image, audio)
-                loadNotes()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
     fun deleteNote(id: Int) {
         viewModelScope.launch {
             try {
@@ -119,71 +86,6 @@ class NoteViewModel : ViewModel() {
             }
         }
     }
-
-    fun createNote(
-        title: String,
-        description: String,
-        imageUri: Uri?,
-        audioUri: Uri?,
-        context: Context
-    ) {
-        viewModelScope.launch {
-            try {
-                val titleBody = title.toRequestBody("text/plain".toMediaType())
-                val descriptionBody = description.toRequestBody("text/plain".toMediaType())
-
-
-                val imagePart: MultipartBody.Part? = imageUri?.let { uri ->
-                    val file = uriToFile(uri, context)
-
-
-                    val mime = context.contentResolver.getType(uri) ?: "image/*"
-
-                    val requestFile = file.asRequestBody(mime.toMediaType())
-                    MultipartBody.Part.createFormData(
-                        "image",
-                        file.name,
-                        requestFile
-                    )
-                }
-
-
-                val audioPart: MultipartBody.Part? = audioUri?.let { uri ->
-                    val file = uriToFile(uri, context)
-
-
-                    val mime = context.contentResolver.getType(uri) ?: "audio/*"
-
-                    val requestFile = file.asRequestBody(mime.toMediaType())
-                    MultipartBody.Part.createFormData(
-                        "audio",
-                        file.name,
-                        requestFile
-                    )
-                }
-
-
-                val response = repository.createNote(
-                    titleBody,
-                    descriptionBody,
-                    imagePart,
-                    audioPart
-                )
-
-                if (response.isSuccessful) {
-                    println(" Nota creada correctamente con imagen/audio")
-                    loadNotes()
-                } else {
-                    println(" Error al crear nota: ${response.code()}")
-                    println(" ${response.errorBody()?.string()}")
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
 
     fun updateNote(
         id: Int,
